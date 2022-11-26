@@ -26,30 +26,48 @@ let tarefas = [
 	},
 ];
 
-const handle = (req, res) => res.json({
-    status: "OK",
-    message: `Rota /api/tarefas com método ${req.method}`,
-});
+const handle = (req, res) =>
+	res.json({
+		status: "OK",
+		message: `Rota /api/tarefas no método ${req.method}`,
+	});
 
 const handle_by_id = (req, res) => {
 	let tarefa_id = parseInt(req.params.id);
-	let tarefa = tarefas.filter(tarefa => tarefa.id === tarefa_id);
-    console.log(tarefa)
+	let tarefa = tarefas.filter((tarefa) => tarefa.id === tarefa_id);
+	console.log(tarefa);
 	if (tarefa.length === 0) {
 		res.json({
 			status: "NOK",
 			message: `Tarefa (${tarefa_id}) não encontrada`,
 		});
 	} else {
-        res.json({
-            status: "OK",
-            message: `Rota /api/tarefas/:id (${req.params.id})`,
-            data: tarefa[0],
-        });
-    }
+		res.json({
+			status: "OK",
+			message: `Rota /api/tarefas/:id (${req.params.id})`,
+			data: tarefa[0],
+		});
+	}
 };
 
-exports.delete = handle_by_id;
+exports.delete = (req, res) => {
+	let tarefa_id = parseInt(req.params.id);
+	let tarefa_index = tarefas.findIndex((tarefa) => tarefa.id === tarefa_id);
+	if (tarefa_index === -1) {
+		res.json({
+			status: "NOK",
+			message: `Tarefa (${tarefa_id}) não encontrada`,
+		});
+	} else {
+		let tarefa = tarefas.splice(tarefa_index, 1);
+		res.json({
+			status: "OK",
+			message: `Tarefa (${req.params.id}) apagada`,
+			data: tarefa,
+		});
+	}
+};
+
 exports.get = (req, res) =>
 	res.json({
 		status: "OK",
@@ -57,5 +75,17 @@ exports.get = (req, res) =>
 		data: tarefas,
 	});
 exports.get_by_id = handle_by_id;
-exports.post = handle;
+exports.post = (req, res) => {
+	let tarefa = {
+		id: tarefas.length + 1,
+		title: req.body.title,
+		status: 0,
+	};
+	tarefas.push(tarefa);
+	res.json({
+		status: "OK",
+		message: "Nova tarefa adicionada",
+		data: tarefa,
+	});
+};
 exports.put = handle_by_id;
